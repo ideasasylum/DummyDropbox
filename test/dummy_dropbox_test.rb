@@ -23,6 +23,11 @@ class DummyDropboxTest < Test::Unit::TestCase
     assert( @session.metadata( '/test.jpg').mime_type == 'image/jpeg' )
   end
   
+  def test_thumbnail
+    # not a real test, just ensure it produces something and no error
+    assert( @session.thumbnail('/test.jpg'))
+  end
+    
   def test_list
     assert_equal(['/file1.txt', '/test.jpg', '/folder1'], @session.list('').map{ |e| e.path } )
     assert_equal(['folder1/file2.txt', 'folder1/file3.txt'], @session.list('folder1').map{ |e| e.path } )

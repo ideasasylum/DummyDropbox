@@ -1,4 +1,5 @@
 require 'mime/types'
+require 'mini_magick'
 
 class DummyDropbox
   @@root_path = File.expand_path( "#{File.dirname(__FILE__)}/../test/fixtures/dropbox" )
@@ -46,6 +47,12 @@ module Dropbox
     
     def download(path, options={})
       File.read( "#{Dropbox.files_root_path}/#{path}" )
+    end
+    
+    def thumbnail(path, options={})
+      image = MiniMagick::Image.open "#{Dropbox.files_root_path}/#{path}"
+      image.resize("100x100")
+      image.to_blob
     end
     
     def create_folder(path, options={})
