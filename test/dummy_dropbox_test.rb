@@ -2,7 +2,7 @@ require 'rubygems'
 require 'test/unit'
 require 'ostruct'
 require 'dropbox'
-require "#{File.dirname(__FILE__)}/../lib/dummy_dropbox.rb"
+require "./lib/dummy_dropbox.rb"
 
 class DummyDropboxTest < Test::Unit::TestCase
   def setup
@@ -20,10 +20,11 @@ class DummyDropboxTest < Test::Unit::TestCase
   def test_metadata
     assert( !@session.metadata( '/file1.txt' ).directory? )
     assert( @session.metadata( '/folder1' ).directory? )
+    assert( @session.metadata( '/test.jpg').mime_type == 'image/jpeg' )
   end
   
   def test_list
-    assert_equal(['/file1.txt', '/folder1'], @session.list('').map{ |e| e.path } )
+    assert_equal(['/file1.txt', '/test.jpg', '/folder1'], @session.list('').map{ |e| e.path } )
     assert_equal(['folder1/file2.txt', 'folder1/file3.txt'], @session.list('folder1').map{ |e| e.path } )
   end
   

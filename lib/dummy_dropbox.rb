@@ -1,3 +1,5 @@
+require 'mime/types'
+
 class DummyDropbox
   @@root_path = File.expand_path( "#{File.dirname(__FILE__)}/../test/fixtures/dropbox" )
   
@@ -61,16 +63,20 @@ module Dropbox
     end
     
     def metadata(path, options={})
+      mime_types = MIME::Types.type_for "#{Dropbox.files_root_path}#{path}"
+      is_graphic = mime_types[0] and mime_types[0].media_type == 'image'
+      
       response = <<-RESPONSE
         {
-          "thumb_exists": false,
+          "thumb_exists": "#{is_graphic}",
           "bytes": "#{File.size( "#{Dropbox.files_root_path}/#{path}" )}",
           "modified": "Tue, 04 Nov 2008 02:52:28 +0000",
           "path": "#{path}",
           "is_dir": #{File.directory?( "#{Dropbox.files_root_path}/#{path}" )},
           "size": "566.0KB",
           "root": "dropbox",
-          "icon": "page_white_acrobat"
+          "icon": "page_white_acrobat",
+          "mime_type": "#{mime_types[0].to_s}"
         }
       RESPONSE
       return parse_metadata(JSON.parse(response).symbolize_keys_recursively).to_struct_recursively
@@ -82,17 +88,21 @@ module Dropbox
       Dir["#{Dropbox.files_root_path}/#{path}/**"].each do |element_path|
         element_path.gsub!( "#{Dropbox.files_root_path}/", '' )
         
+        mime_types = MIME::Types.type_for "#{Dropbox.files_root_path}/#{element_path}"
+        is_graphic = mime_types[0] and mime_types[0].media_type == 'image'
+        
         element = 
           OpenStruct.new(
             :icon => 'folder',
             :'directory?' => File.directory?( "#{Dropbox.files_root_path}/#{element_path}" ),
             :path => element_path,
-            :thumb_exists => false,
-            :modified => Time.parse( '2010-01-01 10:10:10' ),
+            :thumb_exists => is_graphic,
+            :modified => File.mtime( "#{Dropbox.files_root_path}/#{element_path}" ),
             :revision => 1,
-            :bytes => 0,
+            :bytes => File.size( "#{Dropbox.files_root_path}/#{element_path}" ),
             :is_dir => File.directory?( "#{Dropbox.files_root_path}/#{element_path}" ),
-            :size => '0 bytes'
+            :size => '0 bytes',
+            :mime_type => mime_types[0].to_s
           )
         
         result << element
