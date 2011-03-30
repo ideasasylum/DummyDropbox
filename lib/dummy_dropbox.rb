@@ -112,9 +112,6 @@ module Dropbox
             :mime_type => mime_types[0].to_s
         }
         
-        require 'ruby-debug'
-        debugger
-        
         result << element.to_struct
       end
       
