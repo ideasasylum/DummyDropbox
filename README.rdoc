@@ -1,5 +1,7 @@
 = DummyDropbox
 
+    *NOTE*: This is a fork of the original dummy_dropbox[https://github.com/fguillen/DummyDropbox] which adds mime type metadata, accurate file attributes, properly mocked metadata struct (e.g. with .members) and thumbnail downloads
+
 http://farm5.static.flickr.com/4136/4925714505_3a3a0a6134_o.jpg
 
 <b>I can image a Dropbox session, just for testing.</b>

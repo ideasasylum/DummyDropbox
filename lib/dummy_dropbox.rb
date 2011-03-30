@@ -81,31 +81,41 @@ module Dropbox
       RESPONSE
       return parse_metadata(JSON.parse(response).symbolize_keys_recursively).to_struct_recursively
     end
+
+    ElementStruct = Struct.new(:path, :icon, :'directory?', 
+    :path, :thumb_exists, :modified, :bytes, :is_dir, 
+    :size, :revision, :mime_type)
+    class ElementStruct
+        def to_s
+            "#{self[:path]}"
+        end
+    end
+
     
     def list(path, options={})
       result = []
       
-      Dir["#{Dropbox.files_root_path}/#{path}/**"].each do |element_path|
-        element_path.gsub!( "#{Dropbox.files_root_path}/", '' )
+      Dir["#{Dropbox.files_root_path}/#{path}/**"].each do |full_path|
+        element_path = full_path.gsub( "#{Dropbox.files_root_path}/", '' )
         
-        mime_types = MIME::Types.type_for "#{Dropbox.files_root_path}/#{element_path}"
+        mime_types = MIME::Types.type_for full_path
         is_graphic = mime_types[0] and mime_types[0].media_type == 'image'
         
-        element = 
-          OpenStruct.new(
-            :icon => 'folder',
-            :'directory?' => File.directory?( "#{Dropbox.files_root_path}/#{element_path}" ),
+        element = {:icon => 'folder',
             :path => element_path,
             :thumb_exists => is_graphic,
-            :modified => File.mtime( "#{Dropbox.files_root_path}/#{element_path}" ),
+            :modified => File.mtime(full_path),
             :revision => 1,
-            :bytes => File.size( "#{Dropbox.files_root_path}/#{element_path}" ),
-            :is_dir => File.directory?( "#{Dropbox.files_root_path}/#{element_path}" ),
-            :size => '0 bytes',
+            :bytes => File.size(full_path),
+            :is_dir => File.directory?(full_path),
+            :size => "#{File.size(full_path)} bytes",
             :mime_type => mime_types[0].to_s
-          )
+        }
         
-        result << element
+        require 'ruby-debug'
+        debugger
+        
+        result << element.to_struct
       end
       
       return result
